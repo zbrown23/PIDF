@@ -1,5 +1,7 @@
 #pragma once
 
+#include "optional"
+
 template <typename T> class PIDF {
 private:
     // gains
@@ -77,16 +79,16 @@ public:
         integrator = integrator + k_i * sampleT * (error + prev_error);
         // clamp the integrator
         if (int_max != std::nullopt && integrator > int_max) {
-                integrator = int_max;
+                integrator = int_max.value();
         }
         if (int_min != std::nullopt && integrator < int_min) {
-                integrator = int_min;
+                integrator = int_min.value();
         }
         // calculate derivative term in the low pass case
         if (tau != std::nullopt) {
             differentiator = -(2.0 * k_d * (measurement - prev_measurement)
-                             + (2.0 * tau - sampleT) * differentiator)
-                             / (2.0 * tau * sampleT);
+                             + (2.0 * tau.value() - sampleT) * differentiator)
+                             / (2.0 * tau.value() * sampleT);
         } else {
             // calculate the derivative term in the non-lowpass case.
             differentiator = k_d * (measurement - prev_measurement) / sampleT;
@@ -97,10 +99,10 @@ public:
         T output = proportional + integrator + differentiator + feedforward;
         // clamp the output
         if (out_max != std::nullopt && output > out_max) {
-            output = out_max;
+            output = out_max.value();
         }
         if (out_min != std::nullopt && output < out_min) {
-            output = out_min;
+            output = out_min.value();
         }
         return output;
     }
